@@ -11,6 +11,10 @@ provider "docker" {
   host = "tcp://localhost:2375"
 }
 
+resource "docker_network" "app" {
+  name = "tf-app-net"
+}
+
 resource "docker_image" "nginx" {
   name = var.docker_image_name
 }
@@ -18,12 +22,32 @@ resource "docker_image" "nginx" {
 resource "docker_container" "nginx" {
   name  = var.container_name
   image = docker_image.nginx.image_id
+
+  networks_advanced {
+    name    = docker_network.app.name
+    aliases = ["nginx"]
+  }
+
   ports {
     external = var.external_port
     internal = var.internal_port
     ip       = "0.0.0.0"
     protocol = "tcp"
   }
+}
+
+resource "docker_container" "client" {
+  name  = "curl-client"
+  image = "appropriate/curl:latest"
+
+  networks_advanced {
+    name    = docker_network.app.name
+    aliases = ["curl-client"]
+  }
+
+  command = ["sh", "-c", "curl -sS http://nginx:80 && sleep 3600"]
+
+  depends_on = [docker_container.nginx]
 }
 
 output "nginx_container_id" {

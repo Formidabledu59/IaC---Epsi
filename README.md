@@ -28,3 +28,9 @@ lien util : https://developer.hashicorp.com/terraform/language/values/outputs
 https://slides.com/vm-it/iac#/6/62
 
 ---
+
+## Exo 4 - container Docker
+
+https://slides.com/vm-it/iac#/6/63
+
+---
