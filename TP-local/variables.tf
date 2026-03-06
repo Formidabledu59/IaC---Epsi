@@ -53,3 +53,27 @@ variable "machines" {
     error_message = "Each machine must have vcpu between 2 and 64, disk_size >= 20, and region one of [eu-west-1, us-east-1, ap-southeast-1]."
   }
 }
+
+variable "ec2_instance_type" {
+  description = "Type d'instance EC2"
+  type        = string
+  default     = "t2.micro"
+}
+
+variable "ec2_instance_name" {
+  description = "Nom de l'instance EC2"
+  type        = string
+  default     = "nginx-server"
+}
+
+variable "s3_bucket_name" {
+  description = "Nom du bucket S3"
+  type        = string
+  default     = "my-bucket"
+}
+
+variable "sg_default_port" {
+  description = "Port par défaut pour le groupe de sécurité"
+  type        = number
+  default     = 22
+}

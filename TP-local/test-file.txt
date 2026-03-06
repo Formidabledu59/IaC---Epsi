@@ -1,0 +1,1 @@
+Hello, Monkeys (Freezer)! This is a test file for my Terraform and LocalStack demo.
