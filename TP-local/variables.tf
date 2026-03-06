@@ -15,10 +15,10 @@ variable "external_port" {
   type        = number
   default     = 8081
 }
-variable "client_count" {
-  description = "Number of curl client containers to deploy"
-  type        = number
-  default     = 3
+variable "client_names" {
+  description = "List of client names used to create containers"
+  type        = list(string)
+  default     = ["a", "b", "c"]
 }
 variable "internal_port" {
   description = "internal port of container"

@@ -37,14 +37,14 @@ resource "docker_container" "nginx" {
 }
 
 resource "docker_container" "client" {
-  count = var.client_count
+  for_each = toset(var.client_names)
 
-  name  = "curl-client-${count.index}"
+  name  = "server-${each.value}"
   image = "appropriate/curl:latest"
 
   networks_advanced {
     name    = docker_network.app.name
-    aliases = ["curl-client-${count.index}"]
+    aliases = ["server-${each.value}"]
   }
 
   command = ["sh", "-c", "curl -sS http://nginx:80 && sleep 30"]
