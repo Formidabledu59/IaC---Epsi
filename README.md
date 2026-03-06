@@ -22,3 +22,9 @@ https://slides.com/vm-it/iac#/6/61
 lien util : https://developer.hashicorp.com/terraform/language/values/outputs
 
 ---
+
+## Exo 3 - commande Welcom
+
+https://slides.com/vm-it/iac#/6/62
+
+---

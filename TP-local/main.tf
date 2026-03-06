@@ -30,3 +30,17 @@ output "nginx_container_id" {
   description = "identifiant (id) du conteneur nginx"
   value       = docker_container.nginx.id
 }
+
+resource "null_resource" "nginx_healthcheck" {
+  depends_on = [docker_container.nginx]
+
+  triggers = {
+    always_run = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      powershell -NoProfile -Command "if (-not ((Invoke-WebRequest -UseBasicParsing -Uri http://localhost:${var.external_port} -TimeoutSec 10).Content -match 'Welcome')) { Write-Error 'La page ne contient pas Welcome'; exit 1 }"
+    EOT
+  }
+}
