@@ -15,3 +15,10 @@ https://slides.com/vm-it/iac#/6/60
 lien util : https://developer.hashicorp.com/terraform/language/block/variable
 
 ---
+
+## Exo 2 - outputs
+
+https://slides.com/vm-it/iac#/6/61
+lien util : https://developer.hashicorp.com/terraform/language/values/outputs
+
+---
