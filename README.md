@@ -34,3 +34,9 @@ https://slides.com/vm-it/iac#/6/62
 https://slides.com/vm-it/iac#/6/63
 
 ---
+
+## Exo 5 - multi container Docker
+
+https://slides.com/vm-it/iac#/6/64
+
+---

@@ -37,15 +37,17 @@ resource "docker_container" "nginx" {
 }
 
 resource "docker_container" "client" {
-  name  = "curl-client"
+  count = var.client_count
+
+  name  = "curl-client-${count.index}"
   image = "appropriate/curl:latest"
 
   networks_advanced {
     name    = docker_network.app.name
-    aliases = ["curl-client"]
+    aliases = ["curl-client-${count.index}"]
   }
 
-  command = ["sh", "-c", "curl -sS http://nginx:80 && sleep 3600"]
+  command = ["sh", "-c", "curl -sS http://nginx:80 && sleep 30"]
 
   depends_on = [docker_container.nginx]
 }
