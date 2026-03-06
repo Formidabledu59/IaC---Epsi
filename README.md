@@ -40,3 +40,20 @@ https://slides.com/vm-it/iac#/6/63
 https://slides.com/vm-it/iac#/6/64
 
 ---
+
+## Exo 6 - eu-west-1
+
+Outputs:
+
+machines = tolist([
+  {
+    "disk_size" = 20
+    "name" = "vm-1"
+    "region" = "eu-west-1"
+    "vcpu" = 2
+  },
+])
+
+https://slides.com/vm-it/iac#/6/65
+
+---

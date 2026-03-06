@@ -70,3 +70,8 @@ resource "null_resource" "nginx_healthcheck" {
     EOT
   }
 }
+
+output "machines" {
+  description = "Evaluation de la variable machines (pour valider les contraintes)"
+  value       = var.machines
+}
