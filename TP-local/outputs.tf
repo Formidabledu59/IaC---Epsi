@@ -22,8 +22,3 @@ output "db_instance_public_ip" {
   description = "Public IP of the database EC2 instance"
   value       = aws_instance.database.public_ip
 }
-
-output "bucket_id" {
-  description = "ID du bucket S3"
-  value       = aws_s3_bucket.demo_bucket.id
-}
