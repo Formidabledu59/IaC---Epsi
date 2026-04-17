@@ -15,17 +15,46 @@
           - curl
         state: present
 
-- hosts: webservers
+- hosts: webserver
   become: yes
   tasks:
-    - name: Install Nginx
+    - name: Install Docker
       apt:
-        name: nginx
+        name:
+          - docker.io
         state: present
         update_cache: yes
 
-    - name: Ensure Nginx service is started and enabled
+    - name: Ensure Docker is started and enabled
       service:
-        name: nginx
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull Nginx image
+      shell: docker pull nginx:latest
+      args:
+        creates: /var/lib/docker/image/overlay2/repositories.json
+
+    - name: Run Nginx container
+      shell: |
+        docker rm -f tp-nginx || true
+        docker run -d --name tp-nginx -p 80:80 nginx:latest
+      args:
+        executable: /bin/bash
+
+- hosts: dbserver
+  become: yes
+  tasks:
+    - name: Install MySQL server
+      apt:
+        name:
+          - mysql-server
+        state: present
+        update_cache: yes
+
+    - name: Ensure MySQL is started and enabled
+      service:
+        name: mysql
         state: started
         enabled: yes

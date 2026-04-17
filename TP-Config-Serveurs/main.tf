@@ -58,8 +58,7 @@ resource "aws_security_group" "web" {
   }
 }
 
-resource "aws_instance" "web" {
-  count                     = 3
+resource "aws_instance" "webserver" {
   ami                       = data.aws_ami.ubuntu.id
   instance_type             = var.instance_type
   key_name                  = aws_key_pair.ansible.key_name
@@ -68,27 +67,41 @@ resource "aws_instance" "web" {
   associate_public_ip_address = true
 
   tags = {
-    Name = "tp-web-${count.index + 1}"
+    Name = "webserver"
+  }
+}
+
+resource "aws_instance" "dbserver" {
+  ami                       = data.aws_ami.ubuntu.id
+  instance_type             = var.instance_type
+  key_name                  = aws_key_pair.ansible.key_name
+  subnet_id                 = data.aws_subnet_ids.default.ids[0]
+  vpc_security_group_ids    = [aws_security_group.web.id]
+  associate_public_ip_address = true
+
+  tags = {
+    Name = "dbserver"
   }
 }
 
 locals {
-  inventory_hosts = [for idx, instance in aws_instance.web :
-    "web-${idx + 1} ansible_host=${instance.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=${path.module}/ansible_test_key ansible_python_interpreter=/usr/bin/python3"
-  ]
+  webserver_host = "webserver ansible_host=${aws_instance.webserver.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=./ansible_test_key ansible_python_interpreter=/usr/bin/python3"
+  dbserver_host  = "dbserver ansible_host=${aws_instance.dbserver.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=./ansible_test_key ansible_python_interpreter=/usr/bin/python3"
 }
 
 resource "local_file" "ansible_inventory" {
   filename = "${path.module}/inventory"
   content = <<-EOF
-[webservers]
-%{ for host in local.inventory_hosts }
-${host}
-%{ endfor }
+[webserver]
+${local.webserver_host}
+
+[dbserver]
+${local.dbserver_host}
 
 [all:vars]
 ansible_user=ubuntu
-ansible_ssh_private_key_file=${path.module}/ansible_test_key
+ansible_ssh_private_key_file=./ansible_test_key
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+ansible_python_interpreter=/usr/bin/python3
 EOF
 }

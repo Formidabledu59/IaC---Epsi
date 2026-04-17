@@ -1,6 +1,11 @@
-output "public_ips" {
-  description = "Public IP addresses of the deployed EC2 instances"
-  value       = aws_instance.web.*.public_ip
+output "web_public_ip" {
+  description = "Public IP address of the webserver EC2 instance"
+  value       = aws_instance.webserver.public_ip
+}
+
+output "db_public_ip" {
+  description = "Public IP address of the dbserver EC2 instance"
+  value       = aws_instance.dbserver.public_ip
 }
 
 output "inventory_file" {
