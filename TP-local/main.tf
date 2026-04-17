@@ -1,9 +1,28 @@
 terraform {
   required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
     docker = {
       source  = "kreuzwerker/docker"
       version = "3.5.0"
     }
+  }
+}
+
+provider "aws" {
+  access_key                  = "test"
+  secret_key                  = "test"
+  region                      = "us-east-1"
+  s3_use_path_style           = true
+  skip_credentials_validation = true
+  skip_metadata_api_check     = true
+  skip_requesting_account_id  = true
+  
+  endpoints {
+    s3  = "http://localhost:4566"
+    ec2 = "http://localhost:4566"
   }
 }
 
@@ -74,28 +93,4 @@ resource "null_resource" "nginx_healthcheck" {
 output "machines" {
   description = "Evaluation de la variable machines (pour valider les contraintes)"
   value       = var.machines
-}
-
-//--------------------------------------------------------
-
-# Create an S3 bucket
-resource "aws_s3_bucket" "demo_bucket" {
-  bucket = "my-bucket"
-}
-
-# Enable versioning for the bucket
-resource "aws_s3_bucket_versioning" "demo_bucket_versioning" {
-  bucket = aws_s3_bucket.demo_bucket.id
-
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-# Upload a file to the bucket
-resource "aws_s3_object" "demo_object" {
-  bucket = aws_s3_bucket.demo_bucket.id
-  key    = "hello-world.txt"
-  source = "./test-file.txt"
-  etag   = filemd5("./test-file.txt")
 }
