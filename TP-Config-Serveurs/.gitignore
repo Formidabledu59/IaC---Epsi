@@ -1,0 +1,4 @@
+ansible_test_key
+ansible_test_key.pub
+__pycache__/
+*.pyc

@@ -1,0 +1,61 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install basic packages
+      apt:
+        name:
+          - htop
+          - vim
+          - curl
+        state: present
+
+- hosts: webservers
+  become: yes
+  tasks:
+    - name: Remove nginx if present
+      apt:
+        name: nginx
+        state: absent
+        purge: yes
+        autoremove: yes
+
+    - name: Install Docker engine
+      apt:
+        name:
+          - docker.io
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker service is started and enabled
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull traefik/whoami image
+      shell: docker pull traefik/whoami
+      args:
+        creates: /var/lib/docker/image/overlay2/repositories.json
+
+    - name: Run traefik/whoami container on port 80
+      shell: |
+        docker rm -f whoami || true
+        docker run -d --name whoami -p 80:80 traefik/whoami
+      args:
+        executable: /bin/bash
+
+- hosts: dbservers
+  become: yes
+  tasks:
+    - name: Install MySQL
+      apt:
+        name:
+          - mysql-server
+          - python3-pymysql
+        state: present
