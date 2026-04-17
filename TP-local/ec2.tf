@@ -19,10 +19,10 @@ resource "local_file" "private_key" {
 
 # Web EC2 instance
 resource "aws_instance" "web" {
-  ami             = "ami-le-COde"
-  instance_type   = var.ec2_instance_type
-  security_groups = [aws_security_group.web.name]
-  key_name        = aws_key_pair.deployer.key_name
+  ami                    = "ami-0c02fb55956c7d316"
+  instance_type          = var.ec2_instance_type
+  vpc_security_group_ids = [aws_security_group.web.id]
+  key_name               = aws_key_pair.deployer.key_name
 
   user_data = <<-EOF
               #!/bin/bash
@@ -41,10 +41,10 @@ resource "aws_instance" "web" {
 
 # Database EC2 instance
 resource "aws_instance" "database" {
-  ami             = "ami-xxxxxxxxxxxxxxxxx"
-  instance_type   = var.ec2_instance_type
-  security_groups = [aws_security_group.web.name]
-  key_name        = aws_key_pair.deployer.key_name
+  ami                    = "ami-0c02fb55956c7d316"
+  instance_type          = var.ec2_instance_type
+  vpc_security_group_ids = [aws_security_group.web.id]
+  key_name               = aws_key_pair.deployer.key_name
 
   user_data = <<-EOF
               #!/bin/bash
