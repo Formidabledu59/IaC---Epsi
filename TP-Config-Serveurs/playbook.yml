@@ -7,54 +7,66 @@
         update_cache: yes
         cache_valid_time: 3600
 
-    - name: Install utility packages
+    - name: Install required packages for Docker
       apt:
         name:
-          - htop
-          - vim
+          - apt-transport-https
+          - ca-certificates
           - curl
-        state: present
-
-- hosts: webserver
-  become: yes
-  tasks:
-    - name: Install Docker
-      apt:
-        name:
+          - gnupg
+          - lsb-release
           - docker.io
         state: present
         update_cache: yes
 
-    - name: Ensure Docker is started and enabled
+    - name: Ensure Docker service is started and enabled
       service:
         name: docker
         state: started
         enabled: yes
 
-    - name: Pull Nginx image
-      shell: docker pull nginx:latest
-      args:
-        creates: /var/lib/docker/image/overlay2/repositories.json
+    - name: Create application directory
+      file:
+        path: /home/ubuntu/app
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
 
-    - name: Run Nginx container
+    - name: Copy Dockerfile for application
+      copy:
+        src: Dockerfile
+        dest: /home/ubuntu/app/Dockerfile
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Copy application index page
+      copy:
+        src: index.html
+        dest: /home/ubuntu/app/index.html
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Build Docker image for the application
+      shell: docker build -t myapp:latest /home/ubuntu/app
+      args:
+        chdir: /home/ubuntu
+
+    - name: Pull MySQL Docker image
+      shell: docker pull mysql:8.0
+
+    - name: Run MySQL container
       shell: |
-        docker rm -f tp-nginx || true
-        docker run -d --name tp-nginx -p 80:80 nginx:latest
+        docker rm -f tp-mysql || true
+        docker run -d --name tp-mysql -e MYSQL_ROOT_PASSWORD=ChangeMe -p 3306:3306 mysql:8.0
       args:
         executable: /bin/bash
 
-- hosts: dbserver
-  become: yes
-  tasks:
-    - name: Install MySQL server
-      apt:
-        name:
-          - mysql-server
-        state: present
-        update_cache: yes
-
-    - name: Ensure MySQL is started and enabled
-      service:
-        name: mysql
-        state: started
-        enabled: yes
+    - name: Run application container
+      shell: |
+        docker rm -f tp-app || true
+        docker run -d --name tp-app --link tp-mysql:mysql -p 80:80 myapp:latest
+      args:
+        executable: /bin/bash

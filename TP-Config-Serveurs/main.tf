@@ -26,13 +26,13 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_key_pair" "ansible" {
-  key_name   = "ansible-tp-key"
+  key_name   = "ansible-exo4-key"
   public_key = file("${path.module}/ansible_test_key.pub")
 }
 
-resource "aws_security_group" "web" {
-  name        = "ansible-web-sg"
-  description = "Allow SSH and HTTP access for Ansible-managed web servers"
+resource "aws_security_group" "app" {
+  name        = "ansible-app-sg"
+  description = "Allow SSH, HTTP and MySQL access for the application server"
 
   ingress {
     description = "SSH"
@@ -50,6 +50,14 @@ resource "aws_security_group" "web" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    description = "MySQL"
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -58,45 +66,24 @@ resource "aws_security_group" "web" {
   }
 }
 
-resource "aws_instance" "webserver" {
-  ami                       = data.aws_ami.ubuntu.id
-  instance_type             = var.instance_type
-  key_name                  = aws_key_pair.ansible.key_name
-  subnet_id                 = data.aws_subnet_ids.default.ids[0]
-  vpc_security_group_ids    = [aws_security_group.web.id]
+resource "aws_instance" "appserver" {
+  ami                         = data.aws_ami.ubuntu.id
+  instance_type               = var.instance_type
+  key_name                    = aws_key_pair.ansible.key_name
+  subnet_id                   = data.aws_subnet_ids.default.ids[0]
+  vpc_security_group_ids      = [aws_security_group.app.id]
   associate_public_ip_address = true
 
   tags = {
-    Name = "webserver"
+    Name = "appserver"
   }
-}
-
-resource "aws_instance" "dbserver" {
-  ami                       = data.aws_ami.ubuntu.id
-  instance_type             = var.instance_type
-  key_name                  = aws_key_pair.ansible.key_name
-  subnet_id                 = data.aws_subnet_ids.default.ids[0]
-  vpc_security_group_ids    = [aws_security_group.web.id]
-  associate_public_ip_address = true
-
-  tags = {
-    Name = "dbserver"
-  }
-}
-
-locals {
-  webserver_host = "webserver ansible_host=${aws_instance.webserver.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=./ansible_test_key ansible_python_interpreter=/usr/bin/python3"
-  dbserver_host  = "dbserver ansible_host=${aws_instance.dbserver.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=./ansible_test_key ansible_python_interpreter=/usr/bin/python3"
 }
 
 resource "local_file" "ansible_inventory" {
   filename = "${path.module}/inventory"
   content = <<-EOF
-[webserver]
-${local.webserver_host}
-
-[dbserver]
-${local.dbserver_host}
+[appserver]
+appserver ansible_host=${aws_instance.appserver.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=./ansible_test_key ansible_python_interpreter=/usr/bin/python3
 
 [all:vars]
 ansible_user=ubuntu
